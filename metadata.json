@@ -1,0 +1,8 @@
+
+{
+  "name": "AppliSync - Appliance Inventory Dashboard",
+  "description": "A high-fidelity inventory management system for appliances with real-time monitoring, stock alerts, and AI-powered insights.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
