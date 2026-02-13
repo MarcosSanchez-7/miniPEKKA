@@ -1,37 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dashboard from './Dashboard';
 import Ecommerce from './Ecommerce';
+import { AuthProvider } from './contexts/AuthContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'ecommerce'>('ecommerce');
+  const [currentRoute, setCurrentRoute] = useState<'store' | 'admin'>('store');
+
+  useEffect(() => {
+    // Detectar la ruta actual
+    const path = window.location.pathname;
+    if (path === '/admin' || path === '/admin/') {
+      setCurrentRoute('admin');
+    } else {
+      setCurrentRoute('store');
+    }
+
+    // Escuchar cambios en la URL
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/admin' || path === '/admin/') {
+        setCurrentRoute('admin');
+      } else {
+        setCurrentRoute('store');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigateTo = (route: 'store' | 'admin') => {
+    if (route === 'admin') {
+      window.history.pushState({}, '', '/admin');
+      setCurrentRoute('admin');
+    } else {
+      window.history.pushState({}, '', '/');
+      setCurrentRoute('store');
+    }
+  };
 
   return (
-    <div className="min-h-screen">
-      {/* View Switcher */}
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[100] glass-effect border border-primary/20 rounded-full p-1 flex gap-1">
-        <button
-          onClick={() => setCurrentView('ecommerce')}
-          className={`px-6 py-2 rounded-full font-semibold text-sm transition-all ${currentView === 'ecommerce'
-              ? 'bg-primary text-white shadow-lg shadow-primary/30'
-              : 'text-slate-400 hover:text-white'
-            }`}
-        >
-          🛒 Tienda
-        </button>
-        <button
-          onClick={() => setCurrentView('dashboard')}
-          className={`px-6 py-2 rounded-full font-semibold text-sm transition-all ${currentView === 'dashboard'
-              ? 'bg-primary text-white shadow-lg shadow-primary/30'
-              : 'text-slate-400 hover:text-white'
-            }`}
-        >
-          📊 Dashboard
-        </button>
-      </div>
-
-      {/* Render Current View */}
-      {currentView === 'ecommerce' ? <Ecommerce /> : <Dashboard />}
-    </div>
+    <AuthProvider>
+      <FavoritesProvider>
+        <div className="min-h-screen">
+          {/* Render Current View */}
+          {currentRoute === 'admin' ? (
+            <>
+              {/* Admin Navigation Button */}
+              <div className="fixed top-4 right-4 z-[100]">
+                <button
+                  onClick={() => navigateTo('store')}
+                  className="glass-effect border border-primary/20 rounded-full px-6 py-2 font-semibold text-sm transition-all hover:bg-primary/20 flex items-center gap-2"
+                >
+                  <span className="material-icons text-sm">storefront</span>
+                  Ir a Tienda
+                </button>
+              </div>
+              <Dashboard />
+            </>
+          ) : (
+            <Ecommerce />
+          )}
+        </div>
+      </FavoritesProvider>
+    </AuthProvider>
   );
 };
 

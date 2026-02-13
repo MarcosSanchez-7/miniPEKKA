@@ -1,10 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from './contexts/AuthContext';
+import { useFavorites } from './contexts/FavoritesContext';
+import LoginModal from './components/LoginModal';
 
 const Ecommerce: React.FC = () => {
+  const { user, logout, isAuthenticated } = useAuth();
+  const { favorites, addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const products = [
+    { id: '1', img: 'photo-1571175443880-49e1d25b2bc5', category: 'HELADERAS', name: 'Heladera No Frost 350L Inverter', price: '$249,999', oldPrice: '$329,999', badge: 'NUEVO', badgeColor: 'bg-green-500', categoryColor: 'text-primary', rating: 4 },
+    { id: '2', img: 'photo-1626806787461-102c1bfaaea1', category: 'LAVARROPAS', name: 'Lavarropas Carga Superior 7kg', price: '$159,999', oldPrice: '$209,999', badge: '-25%', badgeColor: 'bg-red-500', categoryColor: 'text-blue-400', rating: 5 },
+    { id: '3', img: 'photo-1585659722983-3a675dabf23d', category: 'HORNOS', name: 'Horno Eléctrico Empotrable 60cm', price: '$179,999', oldPrice: null, badge: null, badgeColor: '', categoryColor: 'text-purple-400', rating: 4 },
+    { id: '4', img: 'photo-1574269909862-7e1d70bb8078', category: 'MICROONDAS', name: 'Microondas Digital 28L Grill', price: '$89,999', oldPrice: '$119,999', badge: 'OFERTA', badgeColor: 'bg-amber-500', categoryColor: 'text-amber-400', rating: 5 },
+    { id: '5', img: 'photo-1588854337221-4cf9fa96059c', category: 'AIRE ACONDICIONADO', name: 'Aire Split Frío/Calor 3500W', price: '$329,999', oldPrice: null, badge: null, badgeColor: '', categoryColor: 'text-cyan-400', rating: 4 },
+    { id: '6', img: 'photo-1556911220-bff31c812dba', category: 'LAVAVAJILLAS', name: 'Lavavajillas 12 Cubiertos A++', price: '$279,999', oldPrice: '$399,999', badge: '-30%', badgeColor: 'bg-red-500', categoryColor: 'text-pink-400', rating: 5 },
+    { id: '7', img: 'photo-1595515106969-1ce29566ff1c', category: 'COCINAS', name: 'Cocina a Gas 4 Hornallas Vidrio', price: '$199,999', oldPrice: null, badge: null, badgeColor: '', categoryColor: 'text-emerald-400', rating: 4 },
+    { id: '8', img: 'photo-1558618666-fcd25c85cd64', category: 'FREEZERS', name: 'Freezer Vertical 250L A+ Inverter', price: '$219,999', oldPrice: null, badge: 'ECO', badgeColor: 'bg-green-500', categoryColor: 'text-primary', rating: 5 },
+  ];
+
   useEffect(() => {
-    // Scroll to top functionality
     const scrollTopBtn = document.getElementById('scrollTop');
-    
+
     const handleScroll = () => {
       if (scrollTopBtn) {
         if (window.pageYOffset > 300) {
@@ -19,7 +37,6 @@ const Ecommerce: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll);
 
-    // Add animation on scroll
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
@@ -51,6 +68,27 @@ const Ecommerce: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleFavoriteClick = (productId: string) => {
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    if (isFavorite(productId)) {
+      removeFromFavorites(productId);
+    } else {
+      addToFavorites(productId);
+    }
+  };
+
+  const handleLoginClick = () => {
+    if (isAuthenticated) {
+      setShowUserMenu(!showUserMenu);
+    } else {
+      setIsLoginModalOpen(true);
+    }
+  };
+
   return (
     <div className="bg-background-dark text-slate-100 font-display antialiased">
       {/* Navigation Header */}
@@ -66,31 +104,66 @@ const Ecommerce: React.FC = () => {
                 Electro<span className="gradient-text">Store</span>
               </span>
             </div>
-            
+
             {/* Search Bar */}
             <div className="hidden md:flex items-center gap-3 bg-white/5 border border-primary/20 rounded-xl px-4 py-2.5 flex-1 max-w-md mx-8">
               <span className="material-icons text-slate-400 text-sm">search</span>
-              <input 
-                type="text" 
-                placeholder="Buscar electrodomésticos..." 
+              <input
+                type="text"
+                placeholder="Buscar electrodomésticos..."
                 className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-500"
               />
             </div>
-            
+
             {/* Actions */}
             <div className="flex items-center gap-4">
-              <button className="relative p-2 hover:bg-primary/10 rounded-lg transition-colors">
-                <span className="material-icons text-slate-300">favorite_border</span>
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              <button
+                onClick={() => isAuthenticated ? null : setIsLoginModalOpen(true)}
+                className="relative p-2 hover:bg-primary/10 rounded-lg transition-colors"
+                title={isAuthenticated ? 'Mis Favoritos' : 'Inicia sesión para ver favoritos'}
+              >
+                <span className={`material-icons text-slate-300 ${favorites.length > 0 ? 'text-red-500' : ''}`}>
+                  {favorites.length > 0 ? 'favorite' : 'favorite_border'}
+                </span>
+                {favorites.length > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                )}
               </button>
               <button className="relative p-2 hover:bg-primary/10 rounded-lg transition-colors">
                 <span className="material-icons text-slate-300">shopping_cart</span>
-                <span className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                <span className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
               </button>
-              <button className="hidden sm:flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-lg shadow-primary/30 active:scale-95">
-                <span className="material-icons text-sm">person</span>
-                Ingresar
-              </button>
+
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  onClick={handleLoginClick}
+                  className="hidden sm:flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-lg shadow-primary/30 active:scale-95"
+                >
+                  <span className="material-icons text-sm">person</span>
+                  {isAuthenticated ? user?.name?.split(' ')[0] : 'Ingresar'}
+                </button>
+
+                {/* Dropdown Menu */}
+                {showUserMenu && isAuthenticated && (
+                  <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-primary/20 rounded-xl shadow-2xl shadow-primary/10 overflow-hidden animate-slide-up">
+                    <div className="p-3 border-b border-primary/10">
+                      <p className="text-sm font-semibold">{user?.name}</p>
+                      <p className="text-xs text-slate-400">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-primary/10 transition-colors flex items-center gap-2"
+                    >
+                      <span className="material-icons text-sm">logout</span>
+                      Cerrar Sesión
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -110,10 +183,9 @@ const Ecommerce: React.FC = () => {
 
       {/* Hero Section - Ofertas Destacadas */}
       <section className="hero-gradient py-20 px-6 relative overflow-hidden">
-        {/* Decorative Elements */}
         <div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        
+
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12 animate-slide-up">
             <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-tight">
@@ -127,77 +199,35 @@ const Ecommerce: React.FC = () => {
 
           {/* Hero Offers Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-            {/* Offer Card 1 */}
-            <div className="group relative bg-gradient-to-br from-primary/20 to-transparent border border-primary/30 rounded-2xl p-6 hover:border-primary/60 transition-all duration-300 overflow-hidden">
-              <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full offer-badge">
-                -45%
-              </div>
-              <div className="relative z-10">
-                <div className="w-full h-48 bg-white/5 rounded-xl mb-4 overflow-hidden">
-                  <img src="https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=300&fit=crop" 
-                       alt="Heladera Premium" 
-                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            {/* Offer Cards */}
+            {[
+              { name: 'Heladera Side by Side', desc: 'Capacidad 500L, Inverter, No Frost', price: '$299,999', oldPrice: '$549,999', discount: '-45%', img: 'photo-1571175443880-49e1d25b2bc5', color: 'primary' },
+              { name: 'Lavarropas Automático', desc: 'Carga frontal 8kg, 1400 RPM', price: '$189,999', oldPrice: '$289,999', discount: '-35%', img: 'photo-1626806787461-102c1bfaaea1', color: 'blue-500' },
+              { name: 'Horno Eléctrico Smart', desc: 'Multifunción, Convección, 70L', price: '$149,999', oldPrice: '$299,999', discount: '-50%', img: 'photo-1585659722983-3a675dabf23d', color: 'purple-500' },
+            ].map((offer, idx) => (
+              <div key={idx} className={`group relative bg-gradient-to-br from-${offer.color}/20 to-transparent border border-${offer.color}/30 rounded-2xl p-6 hover:border-${offer.color}/60 transition-all duration-300 overflow-hidden ${idx === 2 ? 'md:col-span-2 lg:col-span-1' : ''}`}>
+                <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full offer-badge">
+                  {offer.discount}
                 </div>
-                <h3 className="text-xl font-bold mb-2">Heladera Side by Side</h3>
-                <p className="text-sm text-slate-400 mb-4">Capacidad 500L, Inverter, No Frost</p>
-                <div className="flex items-baseline gap-3 mb-4">
-                  <span className="text-3xl font-bold text-primary">$299,999</span>
-                  <span className="text-lg text-slate-500 line-through">$549,999</span>
+                <div className="relative z-10">
+                  <div className="w-full h-48 bg-white/5 rounded-xl mb-4 overflow-hidden">
+                    <img src={`https://images.unsplash.com/${offer.img}?w=400&h=300&fit=crop`}
+                      alt={offer.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{offer.name}</h3>
+                  <p className="text-sm text-slate-400 mb-4">{offer.desc}</p>
+                  <div className="flex items-baseline gap-3 mb-4">
+                    <span className={`text-3xl font-bold text-${offer.color === 'primary' ? 'primary' : offer.color.replace('500', '400')}`}>{offer.price}</span>
+                    <span className="text-lg text-slate-500 line-through">{offer.oldPrice}</span>
+                  </div>
+                  <button className={`w-full bg-${offer.color} hover:bg-${offer.color}/90 text-white font-semibold py-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2`}>
+                    <span className="material-icons text-sm">shopping_cart</span>
+                    Agregar al Carrito
+                  </button>
                 </div>
-                <button className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2">
-                  <span className="material-icons text-sm">shopping_cart</span>
-                  Agregar al Carrito
-                </button>
               </div>
-            </div>
-
-            {/* Offer Card 2 */}
-            <div className="group relative bg-gradient-to-br from-blue-500/20 to-transparent border border-blue-500/30 rounded-2xl p-6 hover:border-blue-500/60 transition-all duration-300 overflow-hidden">
-              <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full offer-badge">
-                -35%
-              </div>
-              <div className="relative z-10">
-                <div className="w-full h-48 bg-white/5 rounded-xl mb-4 overflow-hidden">
-                  <img src="https://images.unsplash.com/photo-1626806787461-102c1bfaaea1?w=400&h=300&fit=crop" 
-                       alt="Lavarropas" 
-                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Lavarropas Automático</h3>
-                <p className="text-sm text-slate-400 mb-4">Carga frontal 8kg, 1400 RPM</p>
-                <div className="flex items-baseline gap-3 mb-4">
-                  <span className="text-3xl font-bold text-blue-400">$189,999</span>
-                  <span className="text-lg text-slate-500 line-through">$289,999</span>
-                </div>
-                <button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2">
-                  <span className="material-icons text-sm">shopping_cart</span>
-                  Agregar al Carrito
-                </button>
-              </div>
-            </div>
-
-            {/* Offer Card 3 */}
-            <div className="group relative bg-gradient-to-br from-purple-500/20 to-transparent border border-purple-500/30 rounded-2xl p-6 hover:border-purple-500/60 transition-all duration-300 overflow-hidden md:col-span-2 lg:col-span-1">
-              <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full offer-badge">
-                -50%
-              </div>
-              <div className="relative z-10">
-                <div className="w-full h-48 bg-white/5 rounded-xl mb-4 overflow-hidden">
-                  <img src="https://images.unsplash.com/photo-1585659722983-3a675dabf23d?w=400&h=300&fit=crop" 
-                       alt="Horno Eléctrico" 
-                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Horno Eléctrico Smart</h3>
-                <p className="text-sm text-slate-400 mb-4">Multifunción, Convección, 70L</p>
-                <div className="flex items-baseline gap-3 mb-4">
-                  <span className="text-3xl font-bold text-purple-400">$149,999</span>
-                  <span className="text-lg text-slate-500 line-through">$299,999</span>
-                </div>
-                <button className="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2">
-                  <span className="material-icons text-sm">shopping_cart</span>
-                  Agregar al Carrito
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -222,23 +252,22 @@ const Ecommerce: React.FC = () => {
 
           {/* Products Grid - 4 Columns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { img: 'photo-1571175443880-49e1d25b2bc5', category: 'HELADERAS', name: 'Heladera No Frost 350L Inverter', price: '$249,999', oldPrice: '$329,999', badge: 'NUEVO', badgeColor: 'bg-green-500', categoryColor: 'text-primary', rating: 4 },
-              { img: 'photo-1626806787461-102c1bfaaea1', category: 'LAVARROPAS', name: 'Lavarropas Carga Superior 7kg', price: '$159,999', oldPrice: '$209,999', badge: '-25%', badgeColor: 'bg-red-500', categoryColor: 'text-blue-400', rating: 5 },
-              { img: 'photo-1585659722983-3a675dabf23d', category: 'HORNOS', name: 'Horno Eléctrico Empotrable 60cm', price: '$179,999', oldPrice: null, badge: null, badgeColor: '', categoryColor: 'text-purple-400', rating: 4 },
-              { img: 'photo-1574269909862-7e1d70bb8078', category: 'MICROONDAS', name: 'Microondas Digital 28L Grill', price: '$89,999', oldPrice: '$119,999', badge: 'OFERTA', badgeColor: 'bg-amber-500', categoryColor: 'text-amber-400', rating: 5 },
-              { img: 'photo-1588854337221-4cf9fa96059c', category: 'AIRE ACONDICIONADO', name: 'Aire Split Frío/Calor 3500W', price: '$329,999', oldPrice: null, badge: null, badgeColor: '', categoryColor: 'text-cyan-400', rating: 4 },
-              { img: 'photo-1556911220-bff31c812dba', category: 'LAVAVAJILLAS', name: 'Lavavajillas 12 Cubiertos A++', price: '$279,999', oldPrice: '$399,999', badge: '-30%', badgeColor: 'bg-red-500', categoryColor: 'text-pink-400', rating: 5 },
-              { img: 'photo-1595515106969-1ce29566ff1c', category: 'COCINAS', name: 'Cocina a Gas 4 Hornallas Vidrio', price: '$199,999', oldPrice: null, badge: null, badgeColor: '', categoryColor: 'text-emerald-400', rating: 4 },
-              { img: 'photo-1558618666-fcd25c85cd64', category: 'FREEZERS', name: 'Freezer Vertical 250L A+ Inverter', price: '$219,999', oldPrice: null, badge: 'ECO', badgeColor: 'bg-green-500', categoryColor: 'text-primary', rating: 5 },
-            ].map((product, idx) => (
-              <div key={idx} className="product-card bg-white/5 border border-primary/10 rounded-xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
+            {products.map((product) => (
+              <div key={product.id} className="product-card bg-white/5 border border-primary/10 rounded-xl overflow-hidden hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/10">
                 <div className="relative">
-                  <img src={`https://images.unsplash.com/${product.img}?w=300&h=300&fit=crop`} 
-                       alt="Producto" 
-                       className="w-full h-56 object-cover" />
-                  <button className="absolute top-3 right-3 w-9 h-9 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                    <span className="material-icons text-sm text-white">favorite_border</span>
+                  <img src={`https://images.unsplash.com/${product.img}?w=300&h=300&fit=crop`}
+                    alt="Producto"
+                    className="w-full h-56 object-cover" />
+                  <button
+                    onClick={() => handleFavoriteClick(product.id)}
+                    className={`absolute top-3 right-3 w-9 h-9 backdrop-blur-sm rounded-full flex items-center justify-center transition-all ${isFavorite(product.id)
+                      ? 'bg-red-500 hover:bg-red-600'
+                      : 'bg-black/50 hover:bg-primary'
+                      }`}
+                  >
+                    <span className="material-icons text-sm text-white">
+                      {isFavorite(product.id) ? 'favorite' : 'favorite_border'}
+                    </span>
                   </button>
                   {product.badge && (
                     <span className={`absolute top-3 left-3 ${product.badgeColor} text-white text-xs font-bold px-2 py-1 rounded-md`}>{product.badge}</span>
@@ -314,7 +343,6 @@ const Ecommerce: React.FC = () => {
       <footer className="bg-slate-950 border-t border-primary/10 py-12 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-            {/* Company Info */}
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/30">
@@ -338,7 +366,6 @@ const Ecommerce: React.FC = () => {
               </div>
             </div>
 
-            {/* Quick Links */}
             <div>
               <h4 className="font-bold mb-4">Enlaces Rápidos</h4>
               <ul className="space-y-2 text-sm text-slate-400">
@@ -350,7 +377,6 @@ const Ecommerce: React.FC = () => {
               </ul>
             </div>
 
-            {/* Customer Service */}
             <div>
               <h4 className="font-bold mb-4">Atención al Cliente</h4>
               <ul className="space-y-2 text-sm text-slate-400">
@@ -362,7 +388,6 @@ const Ecommerce: React.FC = () => {
               </ul>
             </div>
 
-            {/* Contact Info */}
             <div>
               <h4 className="font-bold mb-4">Contacto</h4>
               <ul className="space-y-3 text-sm text-slate-400">
@@ -386,7 +411,6 @@ const Ecommerce: React.FC = () => {
             </div>
           </div>
 
-          {/* Payment Methods */}
           <div className="border-t border-primary/10 pt-8 mb-8">
             <h4 className="font-bold mb-4 text-center">Medios de Pago</h4>
             <div className="flex flex-wrap justify-center gap-4">
@@ -396,7 +420,6 @@ const Ecommerce: React.FC = () => {
             </div>
           </div>
 
-          {/* Copyright */}
           <div className="border-t border-primary/10 pt-8 text-center text-sm text-slate-500">
             <p>&copy; 2026 ElectroStore. Todos los derechos reservados. | <a href="#" className="hover:text-primary transition-colors">Términos y Condiciones</a> | <a href="#" className="hover:text-primary transition-colors">Política de Privacidad</a></p>
           </div>
@@ -412,6 +435,9 @@ const Ecommerce: React.FC = () => {
       <button id="scrollTop" onClick={scrollToTop} className="fixed bottom-6 left-6 w-12 h-12 bg-primary/20 hover:bg-primary border border-primary/30 rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 z-50 opacity-0 pointer-events-none">
         <span className="material-icons text-white">arrow_upward</span>
       </button>
+
+      {/* Login Modal */}
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </div>
   );
 };
