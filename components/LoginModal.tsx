@@ -65,8 +65,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
-            <div className="bg-slate-900 border border-primary/20 rounded-2xl p-8 w-full max-w-md mx-4 shadow-2xl shadow-primary/10 animate-slide-up">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white border border-primary/20 rounded-2xl p-8 w-full max-w-md mx-4 shadow-2xl shadow-primary/10 animate-slide-up">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold">
@@ -168,3 +168,4 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 };
 
 export default LoginModal;
+

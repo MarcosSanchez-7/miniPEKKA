@@ -1,32 +1,47 @@
-
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AppliSync Dashboard</title>
+    <title>ElectroStore - Dashboard</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#135bec",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101622",
+                        "primary": "#FF6B35",
+                        "primary-dark": "#E55A2B",
+                        "background-light": "#FFFFFF",
+                        "background-dark": "#F8F9FA",
+                        "orange": {
+                            50: "#FFF5F2",
+                            100: "#FFE8E0",
+                            200: "#FFD1C1",
+                            300: "#FFB199",
+                            400: "#FF8A66",
+                            500: "#FF6B35",
+                            600: "#E55A2B",
+                            700: "#CC4A21",
+                            800: "#B33B18",
+                            900: "#992C0F",
+                        }
                     },
                     fontFamily: {
                         "display": ["Manrope", "sans-serif"]
                     },
                     borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "2xl": "1rem",
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "2xl": "1.25rem",
                         "full": "9999px"
                     },
                 },
@@ -34,18 +49,36 @@
         }
     </script>
     <style>
-        body { font-family: 'Manrope', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #101622; }
-        ::-webkit-scrollbar-thumb { background: #135bec40; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #135bec60; }
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F8F9FA;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #FF6B3560;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF6B3580;
+        }
+
         .glass-effect {
-          background: rgba(16, 22, 34, 0.7);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
     </style>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
     "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
@@ -55,10 +88,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+    <link rel="stylesheet" href="/index.css">
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen font-display antialiased">
+
+<body class="bg-background-light text-slate-900 min-h-screen font-display antialiased">
     <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

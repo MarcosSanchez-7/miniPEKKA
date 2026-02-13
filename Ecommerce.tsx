@@ -90,7 +90,7 @@ const Ecommerce: React.FC = () => {
   };
 
   return (
-    <div className="bg-background-dark text-slate-100 font-display antialiased">
+    <div className="bg-white text-slate-900 font-display antialiased">
       {/* Navigation Header */}
       <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-primary/10">
         <div className="max-w-7xl mx-auto px-6 py-4">
@@ -111,7 +111,7 @@ const Ecommerce: React.FC = () => {
               <input
                 type="text"
                 placeholder="Buscar electrodomésticos..."
-                className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-500"
+                className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-600"
               />
             </div>
 
@@ -122,7 +122,7 @@ const Ecommerce: React.FC = () => {
                 className="relative p-2 hover:bg-primary/10 rounded-lg transition-colors"
                 title={isAuthenticated ? 'Mis Favoritos' : 'Inicia sesión para ver favoritos'}
               >
-                <span className={`material-icons text-slate-300 ${favorites.length > 0 ? 'text-red-500' : ''}`}>
+                <span className={`material-icons text-slate-700 ${favorites.length > 0 ? 'text-red-500' : ''}`}>
                   {favorites.length > 0 ? 'favorite' : 'favorite_border'}
                 </span>
                 {favorites.length > 0 && (
@@ -130,7 +130,7 @@ const Ecommerce: React.FC = () => {
                 )}
               </button>
               <button className="relative p-2 hover:bg-primary/10 rounded-lg transition-colors">
-                <span className="material-icons text-slate-300">shopping_cart</span>
+                <span className="material-icons text-slate-700">shopping_cart</span>
                 <span className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">0</span>
               </button>
 
@@ -146,7 +146,7 @@ const Ecommerce: React.FC = () => {
 
                 {/* Dropdown Menu */}
                 {showUserMenu && isAuthenticated && (
-                  <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-primary/20 rounded-xl shadow-2xl shadow-primary/10 overflow-hidden animate-slide-up">
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-primary/20 rounded-xl shadow-2xl shadow-primary/10 overflow-hidden animate-slide-up">
                     <div className="p-3 border-b border-primary/10">
                       <p className="text-sm font-semibold">{user?.name}</p>
                       <p className="text-xs text-slate-400">{user?.email}</p>
@@ -219,7 +219,7 @@ const Ecommerce: React.FC = () => {
                   <p className="text-sm text-slate-400 mb-4">{offer.desc}</p>
                   <div className="flex items-baseline gap-3 mb-4">
                     <span className={`text-3xl font-bold text-${offer.color === 'primary' ? 'primary' : offer.color.replace('500', '400')}`}>{offer.price}</span>
-                    <span className="text-lg text-slate-500 line-through">{offer.oldPrice}</span>
+                    <span className="text-lg text-slate-600 line-through">{offer.oldPrice}</span>
                   </div>
                   <button className={`w-full bg-${offer.color} hover:bg-${offer.color}/90 text-white font-semibold py-3 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-2`}>
                     <span className="material-icons text-sm">shopping_cart</span>
@@ -233,7 +233,7 @@ const Ecommerce: React.FC = () => {
       </section>
 
       {/* Main Products Section - 4 Columns */}
-      <section className="py-16 px-6 bg-background-dark">
+      <section className="py-16 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
             <div>
@@ -262,7 +262,7 @@ const Ecommerce: React.FC = () => {
                     onClick={() => handleFavoriteClick(product.id)}
                     className={`absolute top-3 right-3 w-9 h-9 backdrop-blur-sm rounded-full flex items-center justify-center transition-all ${isFavorite(product.id)
                       ? 'bg-red-500 hover:bg-red-600'
-                      : 'bg-black/50 hover:bg-primary'
+                      : 'bg-white/90 hover:bg-primary'
                       }`}
                   >
                     <span className="material-icons text-sm text-white">
@@ -284,7 +284,7 @@ const Ecommerce: React.FC = () => {
                   </div>
                   <div className="flex items-baseline gap-2 mb-4">
                     <span className="text-2xl font-bold text-primary">{product.price}</span>
-                    {product.oldPrice && <span className="text-sm text-slate-500 line-through">{product.oldPrice}</span>}
+                    {product.oldPrice && <span className="text-sm text-slate-600 line-through">{product.oldPrice}</span>}
                   </div>
                   <button className="w-full bg-primary/10 hover:bg-primary text-primary hover:text-white font-semibold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2">
                     <span className="material-icons text-sm">add_shopping_cart</span>
@@ -340,7 +340,7 @@ const Ecommerce: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-950 border-t border-primary/10 py-12 px-6">
+      <footer className="bg-slate-50 border-t border-primary/10 py-12 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
@@ -420,7 +420,7 @@ const Ecommerce: React.FC = () => {
             </div>
           </div>
 
-          <div className="border-t border-primary/10 pt-8 text-center text-sm text-slate-500">
+          <div className="border-t border-primary/10 pt-8 text-center text-sm text-slate-600">
             <p>&copy; 2026 ElectroStore. Todos los derechos reservados. | <a href="#" className="hover:text-primary transition-colors">Términos y Condiciones</a> | <a href="#" className="hover:text-primary transition-colors">Política de Privacidad</a></p>
           </div>
         </div>
@@ -443,3 +443,4 @@ const Ecommerce: React.FC = () => {
 };
 
 export default Ecommerce;
+
