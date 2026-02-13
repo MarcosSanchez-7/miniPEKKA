@@ -227,20 +227,23 @@ const Ecommerce: React.FC = () => {
         </div>
       </nav>
 
-      {/* Main Message Banner */}
-      <div className="mt-16 bg-gradient-to-r from-orange-50 via-orange-100 to-orange-50 border-b border-orange-200 animate-fade-in">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-center gap-3">
-            <span className="material-icons text-primary animate-pulse">local_offer</span>
-            <p className="text-sm md:text-base font-semibold text-slate-900">
-              <span className="text-primary">¡SUPER OFERTAS!</span> Hasta 50% de descuento en electrodomésticos seleccionados | Envío gratis en compras mayores a ₲ 1.700.000
-            </p>
+      {/* Content Container with proper spacing for fixed navbar */}
+      <div className="pt-16">
+        {/* Main Message Banner */}
+        <div className="bg-gradient-to-r from-orange-50 via-orange-100 to-orange-50 border-b border-orange-200 animate-fade-in">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="flex items-center justify-center gap-3">
+              <span className="material-icons text-primary animate-pulse">local_offer</span>
+              <p className="text-sm md:text-base font-semibold text-slate-900">
+                <span className="text-primary">¡SUPER OFERTAS!</span> Hasta 50% de descuento en electrodomésticos seleccionados | Envío gratis en compras mayores a ₲ 1.700.000
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Hero Carousel */}
-      <HeroCarousel />
+        {/* Hero Carousel */}
+        <HeroCarousel />
+      </div>
 
       {/* Category Filter */}
       <section className="py-8 px-6 bg-slate-50 border-b border-slate-200">
@@ -298,8 +301,8 @@ const Ecommerce: React.FC = () => {
                     <button
                       onClick={() => handleFavoriteClick(product.id)}
                       className={`absolute top-3 right-3 w-10 h-10 backdrop-blur-sm rounded-full flex items-center justify-center transition-all shadow-lg ${isFavorite(product.id)
-                          ? 'bg-red-500 hover:bg-red-600'
-                          : 'bg-white hover:bg-primary'
+                        ? 'bg-red-500 hover:bg-red-600'
+                        : 'bg-white hover:bg-primary'
                         }`}
                     >
                       <span className={`material-icons text-sm ${isFavorite(product.id) ? 'text-white' : 'text-slate-700 group-hover:text-white'}`}>
