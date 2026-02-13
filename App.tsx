@@ -3,6 +3,7 @@ import Dashboard from './Dashboard';
 import Ecommerce from './Ecommerce';
 import { AuthProvider } from './contexts/AuthContext';
 import { FavoritesProvider } from './contexts/FavoritesContext';
+import { CartProvider } from './contexts/CartContext';
 
 const App: React.FC = () => {
   const [currentRoute, setCurrentRoute] = useState<'store' | 'admin'>('store');
@@ -43,26 +44,28 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <FavoritesProvider>
-        <div className="min-h-screen">
-          {/* Render Current View */}
-          {currentRoute === 'admin' ? (
-            <>
-              {/* Admin Navigation Button */}
-              <div className="fixed top-4 right-4 z-[100]">
-                <button
-                  onClick={() => navigateTo('store')}
-                  className="glass-effect border border-primary/20 rounded-full px-6 py-2 font-semibold text-sm transition-all hover:bg-primary/20 flex items-center gap-2"
-                >
-                  <span className="material-icons text-sm">storefront</span>
-                  Ir a Tienda
-                </button>
-              </div>
-              <Dashboard />
-            </>
-          ) : (
-            <Ecommerce />
-          )}
-        </div>
+        <CartProvider>
+          <div className="min-h-screen">
+            {/* Render Current View */}
+            {currentRoute === 'admin' ? (
+              <>
+                {/* Admin Navigation Button */}
+                <div className="fixed top-4 right-4 z-[100]">
+                  <button
+                    onClick={() => navigateTo('store')}
+                    className="glass-effect border border-orange-200 rounded-full px-6 py-2 font-semibold text-sm transition-all hover:bg-orange-50 flex items-center gap-2"
+                  >
+                    <span className="material-icons text-sm">storefront</span>
+                    Ir a Tienda
+                  </button>
+                </div>
+                <Dashboard />
+              </>
+            ) : (
+              <Ecommerce />
+            )}
+          </div>
+        </CartProvider>
       </FavoritesProvider>
     </AuthProvider>
   );
