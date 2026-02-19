@@ -17,7 +17,7 @@ export interface ProductData {
 export const PRODUCTS_DATA: ProductData[] = [
     {
         id: '1',
-        img: 'photo-1696446701796-061030e527d2', // iPhone 15 Pro Max equivalent
+        img: 'photo-1695048133142-1a20484d2569', // iPhone 15 Pro Max equivalent
         category: 'SMARTPHONES',
         name: 'iPhone 15 Pro Max Titanium',
         price: 13500000,
@@ -32,7 +32,7 @@ export const PRODUCTS_DATA: ProductData[] = [
     },
     {
         id: '2',
-        img: 'photo-1517336714731-489689fd1ca4', // MacBook Pro
+        img: 'photo-1611186871348-b1ce696e52c9', // MacBook Pro (using working MBA image for now)
         category: 'LAPTOPS',
         name: 'MacBook Pro 14" M3 Pro',
         price: 18400000,
@@ -62,7 +62,7 @@ export const PRODUCTS_DATA: ProductData[] = [
     },
     {
         id: '4',
-        img: 'photo-1695503248887-2c526d56d10c', // Pixel 8 Pro
+        img: 'https://lh3.googleusercontent.com/22AC6Qcb5-4qN6QJTkBzGK2N5kS5AZyuss9AcAQzAuxjHqGz3VfI5-MSXsKDzuUuePoqHAmyAFyewt9CdNyw3oQikUDY7dTSmyDsVPo=rw-e365-w842-v1',
         category: 'SMARTPHONES',
         name: 'Google Pixel 8 Pro',
         price: 8200000,
@@ -122,7 +122,7 @@ export const PRODUCTS_DATA: ProductData[] = [
     },
     {
         id: '8',
-        img: 'photo-1592750430080-008aa2884c6c', // iPhone 14 or similar
+        img: 'https://tecnoga.com.py/wp-content/uploads/2024/11/3-12.jpg',
         category: 'SMARTPHONES',
         name: 'iPhone 14 128GB',
         price: 6200000,

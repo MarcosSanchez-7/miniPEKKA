@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import KPICard from './components/KPICard';
+import Logo from './components/Logo';
 import { Product, StockStatus } from './types';
 import { INITIAL_PRODUCTS } from './constants';
 import { getInventoryInsights } from './services/geminiService';
 
-import { fetchProducts, createProduct, updateProduct, deleteProduct as deleteProductService } from './services/productService';
+import { fetchProducts, createProduct, updateProduct, deleteProduct as deleteProductService, seedDatabase, uploadProductImage } from './services/productService';
 
 const Dashboard: React.FC = () => {
   const [activeView, setActiveView] = useState('inventory');
@@ -17,6 +18,8 @@ const Dashboard: React.FC = () => {
       localStorage.setItem('dashboard_products', JSON.stringify(products));
     }
   }, [products]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [aiInsight, setAiInsight] = useState<string>('');
@@ -38,6 +41,7 @@ const Dashboard: React.FC = () => {
 
   const handleEditClick = (product: Product) => {
     setEditingProduct(product);
+    setImageFile(null);
     setFormData({
       name: product.name,
       sku: product.sku,
@@ -52,6 +56,7 @@ const Dashboard: React.FC = () => {
 
   const handleAddClick = () => {
     setEditingProduct(null);
+    setImageFile(null);
     setFormData({
       name: '',
       sku: '',
@@ -66,25 +71,44 @@ const Dashboard: React.FC = () => {
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsUploading(true);
 
     // Determine status based on stock
     let status = StockStatus.IN_STOCK;
     if (formData.stock === 0) status = StockStatus.OUT_OF_STOCK;
     else if (formData.stock < 10) status = StockStatus.LOW_STOCK;
 
-    const productData = {
-      name: formData.name,
-      sku: formData.sku,
-      category: formData.category,
-      totalStock: formData.stock,
-      price: formData.price,
-      imageUrl: formData.imageUrl,
-      description: formData.description,
-      status: status,
-      locations: ['Central'] // Default or from form if added
-    };
-
     try {
+      let imageUrl = formData.imageUrl;
+      if (imageFile) {
+        imageUrl = await uploadProductImage(imageFile);
+      }
+
+      const productData = {
+        name: formData.name,
+        sku: formData.sku,
+        category: formData.category,
+        totalStock: formData.stock,
+        price: formData.price,
+        imageUrl: imageUrl,
+        description: formData.description,
+        status: status,
+        locations: ['Central'] // Default or from form if added
+      };
+
+      const tempId = editingProduct ? editingProduct.id : `temp-${Date.now()}`;
+
+      // Optimistic update
+      setProducts(prev => {
+        if (editingProduct) {
+          return prev.map(p => p.id === tempId ? { ...productData, id: tempId } : p);
+        }
+        return [{ ...productData, id: tempId }, ...prev];
+      });
+
+      setShowAddProductModal(false);
+      setIsUploading(false);
+
       if (editingProduct) {
         // Update existing in Firebase
         try {
@@ -92,27 +116,21 @@ const Dashboard: React.FC = () => {
         } catch (fbError) {
           console.warn("Firebase update failed, falling back to local update", fbError);
         }
-        // Update local state
-        setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...productData } : p));
       } else {
         // Create new
-        let newProduct;
         try {
-          newProduct = await createProduct(productData);
+          const newProduct = await createProduct(productData);
+          // Update temp ID with real ID in state silently
+          setProducts(prev => prev.map(p => p.id === tempId ? newProduct : p));
         } catch (fbError) {
           console.warn("Firebase create failed, falling back to local create", fbError);
-          // Fallback ID generation
-          newProduct = { ...productData, id: Date.now().toString() };
         }
-        // Update local state
-        setProducts(prev => [newProduct, ...prev]);
       }
     } catch (error) {
       console.error("Error saving product:", error);
       alert("Failed to save product completely. Check console.");
+      setIsUploading(false);
     }
-
-    setShowAddProductModal(false);
   };
 
   const handleDeleteProduct = async (id: string) => {
@@ -128,6 +146,21 @@ const Dashboard: React.FC = () => {
         console.error("Error deleting product:", error);
         alert("Failed to delete product.");
       }
+    }
+  };
+
+  const handleSeedData = async () => {
+    if (!window.confirm("Add 20 demo products (Technology)?")) return;
+    setIsLoadingProducts(true);
+    try {
+      const newProducts = await seedDatabase();
+      setProducts(prev => [...newProducts, ...prev]);
+      alert("✅ Demo data added successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Error adding demo data");
+    } finally {
+      setIsLoadingProducts(false);
     }
   };
 
@@ -214,13 +247,23 @@ const Dashboard: React.FC = () => {
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Tech Inventory</h1>
                 <p className="text-sm text-slate-600 dark:text-slate-400">Monitor and manage stock across Central and North locations.</p>
               </div>
-              <button
-                onClick={handleAddClick}
-                className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg shadow-primary/20 active:scale-95"
-              >
-                <span className="material-icons text-sm">add</span>
-                Add Product
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSeedData}
+                  disabled={isLoadingProducts}
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                >
+                  <span className="material-icons text-sm">cloud_download</span>
+                  Demo Data
+                </button>
+                <button
+                  onClick={handleAddClick}
+                  className="bg-primary hover:bg-primary-dark text-white px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-lg shadow-primary/20 active:scale-95"
+                >
+                  <span className="material-icons text-sm">add</span>
+                  Add Product
+                </button>
+              </div>
             </div>
 
             {/* KPI Cards */}
@@ -261,23 +304,7 @@ const Dashboard: React.FC = () => {
               />
             </div>
 
-            {/* AI Insights Bar */}
-            <div className="bg-gradient-to-r from-blue-50 to-transparent p-4 rounded-xl border border-blue-200 dark:from-blue-900/20 dark:border-blue-800">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="material-icons text-primary dark:text-blue-400 text-sm">auto_awesome</span>
-                <span className="text-xs font-bold text-primary dark:text-blue-400 uppercase tracking-widest">Gemini Smart Insights</span>
-              </div>
-              {isLoadingInsight ? (
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 animate-pulse">
-                  <span className="material-icons text-sm animate-spin">refresh</span>
-                  Analyzing inventory patterns...
-                </div>
-              ) : (
-                <div className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-                  {aiInsight || 'Error connecting to AI advisor. Please try again later.'}
-                </div>
-              )}
-            </div>
+
 
             {/* Filters */}
             <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-wrap items-center gap-4 shadow-sm">
@@ -365,12 +392,30 @@ const Dashboard: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
               <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <div className="flex items-center justify-between mb-6">
-                  <h4 className="font-bold text-slate-900 dark:text-white">Low Stock Distribution</h4>
+                  <h4 className="font-bold text-slate-900 dark:text-white">ALMACENES</h4>
                   <button className="text-xs text-primary font-bold hover:underline">View All Alerts</button>
                 </div>
                 <div className="space-y-6">
-                  <StockProgress label="Central Warehouse" value={18} max={25} color="bg-primary" />
-                  <StockProgress label="North Store" value={6} max={25} color="bg-amber-500" />
+                  <StockProgress label="Depósito Central" value={18} max={25} color="bg-primary" />
+                  <StockProgress label="Sucursal Norte" value={6} max={25} color="bg-amber-500" />
+
+                  <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-700">
+                    <h5 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-3">Productos con falta de stock</h5>
+                    <ul className="space-y-3">
+                      <li className="flex justify-between text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">iPhone 15 Pro Max</span>
+                        <span className="font-bold text-red-500">Agotado</span>
+                      </li>
+                      <li className="flex justify-between text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">Samsung S24 Ultra</span>
+                        <span className="font-bold text-amber-500">2 unidades</span>
+                      </li>
+                      <li className="flex justify-between text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">MacBook Air M2</span>
+                        <span className="font-bold text-amber-500">5 unidades</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
@@ -414,10 +459,7 @@ const Dashboard: React.FC = () => {
       <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hidden lg:flex flex-col shadow-sm transition-colors duration-300">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
-              <span className="material-icons text-white">bolt</span>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Tech<span className="text-primary">Store</span></span>
+            <Logo className="h-8" textSize="text-xl" />
           </div>
           <nav className="space-y-1">
             <NavItem
@@ -452,16 +494,7 @@ const Dashboard: React.FC = () => {
             />
           </nav>
         </div>
-        <div className="mt-auto p-6">
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
-            <p className="text-xs font-semibold text-primary dark:text-blue-400 uppercase tracking-wider mb-2">Current Plan</p>
-            <p className="text-sm font-bold text-slate-900 dark:text-white mb-1">Enterprise Plus</p>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden mt-3">
-              <div className="bg-primary h-full w-[85%]"></div>
-            </div>
-            <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-2">85% Storage Used</p>
-          </div>
-        </div>
+
       </aside>
 
       {/* Main Content */}
@@ -479,6 +512,13 @@ const Dashboard: React.FC = () => {
             />
           </div>
           <div className="flex items-center gap-6">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              <span className="material-icons">{darkMode ? 'light_mode' : 'dark_mode'}</span>
+            </button>
             <button
               onClick={() => {
                 localStorage.setItem('dashboard_products', JSON.stringify(products));
@@ -592,10 +632,17 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold mb-2 text-slate-900 dark:text-white">Image URL</label>
+                <label className="block text-sm font-semibold mb-2 text-slate-900 dark:text-white">Product Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-4 py-3 mb-3 text-slate-900 dark:text-white"
+                />
+                <label className="block text-xs font-semibold mb-1 text-slate-500">Or Image URL</label>
                 <input
                   type="url"
-                  required
+                  required={!imageFile}
                   value={formData.imageUrl}
                   onChange={e => setFormData({ ...formData, imageUrl: e.target.value })}
                   className="w-full bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg px-4 py-3 focus:ring-2 ring-primary/30 focus:border-primary transition-all text-slate-900 dark:text-white"
@@ -623,9 +670,10 @@ const Dashboard: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all"
+                  disabled={isUploading}
+                  className="px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {editingProduct ? 'Save Changes' : 'Add Product'}
+                  {isUploading ? 'Uploading...' : (editingProduct ? 'Save Changes' : 'Add Product')}
                 </button>
               </div>
             </form>
@@ -644,14 +692,16 @@ const StoresView: React.FC = () => (
       <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Tiendas</h1>
       <p className="text-sm text-slate-600 dark:text-slate-400">Gestión de rendimiento por sucursal</p>
     </div>
+
+    {/* Tienda 1: Showroom */}
     <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
       <div className="flex items-center gap-4 mb-6">
         <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
           <span className="material-icons text-primary dark:text-blue-400 text-3xl">store</span>
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Tienda Principal</h2>
-          <p className="text-slate-600 dark:text-slate-400">Av. Principal 1234, Buenos Aires</p>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Showroom</h2>
+          <p className="text-slate-600 dark:text-slate-400">E. Ayala- Asuncion</p>
         </div>
         <div className="ml-auto">
           <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-bold">ABIERTO AHORA</span>
@@ -682,6 +732,46 @@ const StoresView: React.FC = () => (
         </div>
       </div>
     </div>
+
+    {/* Tienda 2: Shopping Del Sol */}
+    <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+          <span className="material-icons text-purple-600 dark:text-purple-400 text-3xl">shopping_bag</span>
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">Shopping Del Sol</h2>
+          <p className="text-slate-600 dark:text-slate-400">Av. del Chaco- Asuncion</p>
+        </div>
+        <div className="ml-auto">
+          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-bold">ABIERTO AHORA</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-700">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1 uppercase">Ventas Hoy</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">₲ 18.200.000</h3>
+          <p className="text-xs text-green-600 dark:text-green-400 font-bold mt-2 flex items-center gap-1">
+            <span className="material-icons text-xs">trending_up</span> +22% vs ayer
+          </p>
+        </div>
+        <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-700">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1 uppercase">Ventas Mensuales</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">₲ 410.500.000</h3>
+          <p className="text-xs text-green-600 dark:text-green-400 font-bold mt-2 flex items-center gap-1">
+            <span className="material-icons text-xs">trending_up</span> +12% vs mes anterior
+          </p>
+        </div>
+        <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-100 dark:border-slate-700">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-bold mb-1 uppercase">Objetivo Mensual</p>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white">92%</h3>
+          <div className="w-full bg-slate-200 dark:bg-slate-600 h-1.5 rounded-full overflow-hidden mt-2">
+            <div className="bg-purple-600 h-full w-[92%]"></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -706,11 +796,18 @@ const SalesReportView: React.FC = () => (
         </thead>
         <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
           {[
-            { id: '#TRX-9981', product: 'iPhone 15 Pro Max', seller: 'Carlos Ruiz', date: 'Hoy, 10:42', amount: '₲ 13.500.000', status: 'Completado' },
-            { id: '#TRX-9982', product: 'MacBook Pro 14"', seller: 'Ana Silva', date: 'Hoy, 11:15', amount: '₲ 18.400.000', status: 'Completado' },
-            { id: '#TRX-9983', product: 'iPad Air 5', seller: 'Roberto Gómez', date: 'Ayer, 16:30', amount: '₲ 7.200.000', status: 'Pendiente' },
-            { id: '#TRX-9984', product: 'Samsung S24 Ultra', seller: 'Carlos Ruiz', date: 'Ayer, 14:20', amount: '₲ 11.500.000', status: 'Completado' },
-            { id: '#TRX-9985', product: 'AirPods Pro 2', seller: 'Ana Silva', date: 'Ayer, 10:05', amount: '₲ 2.100.000', status: 'Completado' },
+            { id: '#TRX-9981', product: 'iPhone 15 Pro Max', seller: 'Carlos', date: 'Hoy, 10:42', amount: '₲ 13.500.000', status: 'Completado' },
+            { id: '#TRX-9982', product: 'MacBook Pro 14"', seller: 'Marcos', date: 'Hoy, 11:15', amount: '₲ 18.400.000', status: 'Completado' },
+            { id: '#TRX-9983', product: 'iPad Air 5', seller: 'Ivan', date: 'Ayer, 16:30', amount: '₲ 7.200.000', status: 'Pendiente' },
+            { id: '#TRX-9984', product: 'Samsung S24 Ultra', seller: 'Daniel', date: 'Ayer, 14:20', amount: '₲ 11.500.000', status: 'Completado' },
+            { id: '#TRX-9985', product: 'AirPods Pro 2', seller: 'Oliver', date: 'Ayer, 10:05', amount: '₲ 2.100.000', status: 'Completado' },
+            { id: '#TRX-9986', product: 'Sony WH-1000XM5', seller: 'Carlos', date: 'Ayer, 09:15', amount: '₲ 2.800.000', status: 'Completado' },
+            { id: '#TRX-9987', product: 'Galaxy Watch 6', seller: 'Marcos', date: '2 Feb, 18:40', amount: '₲ 2.400.000', status: 'Devuelto' },
+            { id: '#TRX-9988', product: 'PlayStation 5', seller: 'Ivan', date: '2 Feb, 15:20', amount: '₲ 4.500.000', status: 'Completado' },
+            { id: '#TRX-9989', product: 'Nintendo Switch OLED', seller: 'Oliver', date: '1 Feb, 12:10', amount: '₲ 3.200.000', status: 'Completado' },
+            { id: '#TRX-9990', product: 'MacBook Air M2', seller: 'Daniel', date: '1 Feb, 10:00', amount: '₲ 11.800.000', status: 'Pendiente' },
+            { id: '#TRX-9991', product: 'JBL Charge 5', seller: 'Carlos', date: '31 Ene, 19:30', amount: '₲ 1.200.000', status: 'Completado' },
+            { id: '#TRX-9992', product: 'GoPro Hero 12', seller: 'Marcos', date: '31 Ene, 14:45', amount: '₲ 3.900.000', status: 'Completado' },
           ].map((sale, idx) => (
             <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
               <td className="px-6 py-4 font-mono text-xs font-bold text-slate-600 dark:text-slate-400">{sale.id}</td>
@@ -748,9 +845,11 @@ const StaffView: React.FC = () => (
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {[
-        { name: 'Ana Silva', role: 'Gerente de Ventas', sales: '₲ 145M', transactions: 42, color: 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-600', rank: 1, avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d' },
-        { name: 'Carlos Ruiz', role: 'Vendedor Senior', sales: '₲ 98M', transactions: 35, color: 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800', rank: 2, avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
-        { name: 'Roberto Gómez', role: 'Vendedor Junior', sales: '₲ 54M', transactions: 28, color: 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800', rank: 3, avatar: 'https://i.pravatar.cc/150?u=a04258114e29026302d' },
+        { name: 'Carlos', role: 'Vendedor Estrella', sales: '₲ 185M', transactions: 58, color: 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/10 dark:border-yellow-600', rank: 1, avatar: 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png' },
+        { name: 'Marcos', role: 'Vendedor Senior', sales: '₲ 142M', transactions: 45, color: 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800', rank: 2, avatar: 'https://cdn-icons-png.flaticon.com/512/4140/4140047.png' },
+        { name: 'Ivan', role: 'Vendedor Senior', sales: '₲ 128M', transactions: 40, color: 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800', rank: 3, avatar: 'https://cdn-icons-png.flaticon.com/512/4140/4140051.png' },
+        { name: 'Daniel', role: 'Vendedor Junior', sales: '₲ 85M', transactions: 32, color: 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800', rank: 4, avatar: 'https://cdn-icons-png.flaticon.com/512/4140/4140037.png' },
+        { name: 'Oliver', role: 'Vendedor Junior', sales: '₲ 64M', transactions: 25, color: 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800', rank: 5, avatar: 'https://cdn-icons-png.flaticon.com/512/4140/4140040.png' },
       ].map((staff) => (
         <div key={staff.name} className={`relative p-6 rounded-xl border-2 ${staff.color} shadow-sm overflow-hidden flex flex-col items-center text-center transition-colors`}>
           {staff.rank === 1 && (
@@ -865,6 +964,9 @@ const SettingsView: React.FC<{ darkMode: boolean, toggleDarkMode: () => void }> 
   );
 };
 
+
+
+
 // Helper Components
 const NavItem: React.FC<{ icon: string, label: string, active?: boolean, onClick?: () => void }> = ({ icon, label, active, onClick }) => (
   <button
@@ -962,5 +1064,7 @@ const StockProgress: React.FC<{ label: string, value: number, max: number, color
     </div>
   </div>
 );
+
+
 
 export default Dashboard;

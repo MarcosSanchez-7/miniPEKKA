@@ -5,6 +5,8 @@ import { useCart } from './contexts/CartContext';
 import LoginModal from './components/LoginModal';
 import CartModal from './components/CartModal';
 import HeroCarousel from './components/HeroCarousel';
+import Link from 'react-router-dom'; // Placeholder to ensure no syntax error if not used, though not strictly needed here.
+import Logo from './components/Logo';
 import { PRODUCTS_DATA, ProductData } from './data/products';
 
 const Ecommerce: React.FC = () => {
@@ -18,6 +20,16 @@ const Ecommerce: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
 
   useEffect(() => {
     const scrollTopBtn = document.getElementById('scrollTop');
@@ -88,7 +100,7 @@ const Ecommerce: React.FC = () => {
       name: product.name,
       price: product.price,
       originalPrice: product.oldPrice || undefined,
-      image: `https://images.unsplash.com/${product.img}?w=300&h=300&fit=crop`,
+      image: product.img.startsWith('http') ? product.img : `https://images.unsplash.com/${product.img}?w=300&h=300&fit=crop`,
       category: product.category
     });
     showNotificationToast('🛒 Agregado al carrito');
@@ -119,7 +131,7 @@ const Ecommerce: React.FC = () => {
   const categories = ['all', ...Array.from(new Set(PRODUCTS_DATA.map(p => p.category)))];
 
   return (
-    <div className="bg-white text-slate-900 font-display antialiased">
+    <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-display antialiased min-h-screen transition-colors duration-300">
       {/* Notification Toast */}
       {showNotification && (
         <div className="fixed top-24 right-6 z-[150] bg-white border-2 border-primary shadow-2xl shadow-primary/20 rounded-xl px-6 py-4 animate-slide-up">
@@ -128,7 +140,7 @@ const Ecommerce: React.FC = () => {
       )}
 
       {/* Navigation Header */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-effect border-b border-slate-200">
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-effect dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-700 transition-colors">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo - Clickable */}
@@ -140,16 +152,11 @@ const Ecommerce: React.FC = () => {
               }}
               className="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/30">
-                <span className="material-icons text-white">bolt</span>
-              </div>
-              <span className="text-2xl font-bold tracking-tight text-slate-900">
-                Tech<span className="gradient-text">Store</span>
-              </span>
+              <Logo className="h-10" textSize="text-2xl" />
             </button>
 
             {/* Search Bar */}
-            <div className="hidden md:flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 flex-1 max-w-md mx-8">
+            <div className="hidden md:flex items-center gap-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 flex-1 max-w-md mx-8 transition-colors">
               <span className="material-icons text-slate-400 text-sm">search</span>
               <input
                 type="text"
@@ -167,6 +174,14 @@ const Ecommerce: React.FC = () => {
 
             {/* Actions */}
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                <span className="material-icons">{darkMode ? 'light_mode' : 'dark_mode'}</span>
+              </button>
+
               <button
                 onClick={() => isAuthenticated ? null : setIsLoginModalOpen(true)}
                 className="relative p-2 hover:bg-blue-50 rounded-lg transition-colors"
@@ -246,7 +261,7 @@ const Ecommerce: React.FC = () => {
       </div>
 
       {/* Category Filter */}
-      <section className="py-8 px-6 bg-slate-50 border-b border-slate-200">
+      <section className="py-8 px-6 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {categories.map((category) => (
@@ -266,11 +281,11 @@ const Ecommerce: React.FC = () => {
       </section>
 
       {/* Main Products Section - 4 Columns */}
-      <section id="productos" className="py-16 px-6 bg-white">
+      <section id="productos" className="py-16 px-6 bg-white dark:bg-slate-900 transition-colors">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-10">
             <div>
-              <h2 className="text-3xl font-bold mb-2 text-slate-900">
+              <h2 className="text-3xl font-bold mb-2 text-slate-900 dark:text-white">
                 {searchTerm ? `Resultados para "${searchTerm}"` : 'Últimos Lanzamientos'}
               </h2>
               <p className="text-slate-600">
@@ -291,10 +306,10 @@ const Ecommerce: React.FC = () => {
           {filteredProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
-                <div key={product.id} className="product-card bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all group border border-slate-100">
-                  <div className="relative bg-white p-6">
+                <div key={product.id} className="product-card bg-white dark:bg-slate-800 rounded-2xl overflow-hidden hover:shadow-2xl transition-all group border border-slate-100 dark:border-slate-700 flex flex-col h-full">
+                  <div className="relative bg-white dark:bg-slate-800 p-6">
                     <img
-                      src={`https://images.unsplash.com/${product.img}?w=500&q=80`}
+                      src={product.img.startsWith('http') ? product.img : `https://images.unsplash.com/${product.img}?w=500&q=80`}
                       alt={product.name}
                       className="w-full h-56 object-contain group-hover:scale-105 transition-transform duration-500"
                     />
@@ -315,9 +330,9 @@ const Ecommerce: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <div className="p-5 bg-slate-50">
+                  <div className="p-5 bg-slate-50 dark:bg-slate-800/50 flex flex-col flex-1 border-t border-slate-100 dark:border-slate-700">
                     <p className={`text-xs ${product.categoryColor} font-bold mb-2 uppercase tracking-wide`}>{product.category}</p>
-                    <h3 className="font-bold text-base mb-2 line-clamp-2 text-slate-900 min-h-[3rem]">{product.name}</h3>
+                    <h3 className="font-bold text-base mb-2 line-clamp-2 text-slate-900 dark:text-white min-h-[3rem]">{product.name}</h3>
                     <div className="flex items-center gap-1 mb-3">
                       {[...Array(5)].map((_, i) => (
                         <span key={i} className={`material-icons text-sm ${i < product.rating ? 'text-yellow-400' : 'text-slate-300'}`}>star</span>
@@ -330,13 +345,24 @@ const Ecommerce: React.FC = () => {
                       )}
                       <span className="text-2xl font-bold text-primary block">{product.priceFormatted}</span>
                     </div>
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95"
-                    >
-                      <span className="material-icons text-sm">add_shopping_cart</span>
-                      Agregar al Carrito
-                    </button>
+                    <div className="mt-auto space-y-3">
+                      <a
+                        href={`https://wa.me/595985658832?text=${encodeURIComponent(`Hola MiniPekka, estoy interesado en el producto: ${product.name} precio: ${product.priceFormatted}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-500/20 active:scale-95"
+                      >
+                        <span className="material-icons text-sm">chat</span>
+                        Comprar por WhatsApp
+                      </a>
+                      <button
+                        onClick={() => handleAddToCart(product)}
+                        className="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                      >
+                        <span className="material-icons text-sm">add_shopping_cart</span>
+                        Agregar al Carrito
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -409,17 +435,14 @@ const Ecommerce: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-50 border-t border-slate-200 py-12 px-6">
+      <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12 px-6 transition-colors">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/30">
-                  <span className="material-icons text-white">bolt</span>
-                </div>
-                <span className="text-xl font-bold text-slate-900">Tech<span className="gradient-text">Store</span></span>
+                <Logo className="h-10" textSize="text-xl" />
               </div>
-              <p className="text-sm text-slate-600 mb-4">
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                 Tu tienda de confianza para tecnología de última generación. Innovación y calidad garantizada.
               </p>
               <div className="flex gap-3">
@@ -462,15 +485,15 @@ const Ecommerce: React.FC = () => {
               <ul className="space-y-3 text-sm text-slate-600">
                 <li className="flex items-start gap-2">
                   <span className="material-icons text-primary text-sm mt-0.5">location_on</span>
-                  <span>Av. Principal 1234, Buenos Aires, Argentina</span>
+                  <span>LUQUE-PARAGUAY</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="material-icons text-primary text-sm">phone</span>
-                  <span>0800-555-TECH</span>
+                  <span>0983840235</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="material-icons text-primary text-sm">email</span>
-                  <span>ventas@techstore.com</span>
+                  <span>ventas@minipekka.com</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="material-icons text-primary text-sm">schedule</span>
@@ -483,20 +506,20 @@ const Ecommerce: React.FC = () => {
           <div className="border-t border-slate-200 pt-8 mb-8">
             <h4 className="font-bold mb-4 text-center text-slate-900">Medios de Pago</h4>
             <div className="flex flex-wrap justify-center gap-4">
-              {['VISA', 'MASTERCARD', 'AMEX', 'MERCADO PAGO', 'TRANSFERENCIA'].map(method => (
+              {['Pago par', 'Bancard', 'Dinelco', 'Crypto'].map(method => (
                 <div key={method} className="bg-white border border-slate-200 rounded-lg px-4 py-2 text-xs font-semibold text-slate-700">{method}</div>
               ))}
             </div>
           </div>
 
           <div className="border-t border-slate-200 pt-8 text-center text-sm text-slate-600">
-            <p>&copy; 2026 TechStore. Todos los derechos reservados. | <a href="#" className="hover:text-primary transition-colors">Términos y Condiciones</a> | <a href="#" className="hover:text-primary transition-colors">Política de Privacidad</a></p>
+            <p>&copy; 2026 MiniPekka. Todos los derechos reservados. | <a href="#" className="hover:text-primary transition-colors">Términos y Condiciones</a> | <a href="#" className="hover:text-primary transition-colors">Política de Privacidad</a></p>
           </div>
         </div>
       </footer>
 
       {/* Floating WhatsApp Button */}
-      <a href="https://wa.me/5491234567890" target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/50 transition-all hover:scale-110 z-50">
+      <a href="https://wa.me/595985658832" target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-2xl shadow-green-500/50 transition-all hover:scale-110 z-50">
         <span className="material-icons text-white text-2xl">chat</span>
       </a>
 
