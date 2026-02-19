@@ -2,11 +2,16 @@
 import { GoogleGenAI } from "@google/genai";
 import { Product } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+if (!apiKey) {
+  console.error("Missing VITE_GEMINI_API_KEY in environment variables");
+}
+
+const ai = new GoogleGenAI({ apiKey: apiKey || "dummy-key-to-prevent-crash" });
 
 export const getInventoryInsights = async (products: Product[]) => {
   try {
-    const productsContext = products.map(p => 
+    const productsContext = products.map(p =>
       `${p.name} (SKU: ${p.sku}) - Stock: ${p.totalStock}, Status: ${p.status}`
     ).join('\n');
 

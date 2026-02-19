@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ElectroStore - Dashboard</title>
+    <title>TechStore - Dashboard</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -17,21 +17,21 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#FF6B35",
-                        "primary-dark": "#E55A2B",
+                        "primary": "#2563EB", // Blue 600
+                        "primary-dark": "#1D4ED8", // Blue 700
                         "background-light": "#FFFFFF",
-                        "background-dark": "#F8F9FA",
-                        "orange": {
-                            50: "#FFF5F2",
-                            100: "#FFE8E0",
-                            200: "#FFD1C1",
-                            300: "#FFB199",
-                            400: "#FF8A66",
-                            500: "#FF6B35",
-                            600: "#E55A2B",
-                            700: "#CC4A21",
-                            800: "#B33B18",
-                            900: "#992C0F",
+                        "background-dark": "#F8FAFC", // Slate 50
+                        "blue": {
+                            50: "#EFF6FF",
+                            100: "#DBEAFE",
+                            200: "#BFDBFE",
+                            300: "#93C5FD",
+                            400: "#60A5FA",
+                            500: "#3B82F6",
+                            600: "#2563EB",
+                            700: "#1D4ED8",
+                            800: "#1E40AF",
+                            900: "#1E3A8A",
                         }
                     },
                     fontFamily: {
@@ -63,12 +63,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #FF6B3560;
+            background: #3B82F660;
             border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #FF6B3580;
+            background: #3B82F680;
         }
 
         .glass-effect {

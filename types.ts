@@ -15,6 +15,7 @@ export interface Product {
   totalStock: number;
   status: StockStatus;
   imageUrl: string;
+  price?: number;
 }
 
 export interface KPIStats {

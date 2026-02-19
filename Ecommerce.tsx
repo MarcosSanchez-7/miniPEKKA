@@ -144,7 +144,7 @@ const Ecommerce: React.FC = () => {
                 <span className="material-icons text-white">bolt</span>
               </div>
               <span className="text-2xl font-bold tracking-tight text-slate-900">
-                Electro<span className="gradient-text">Store</span>
+                Tech<span className="gradient-text">Store</span>
               </span>
             </button>
 
@@ -155,7 +155,7 @@ const Ecommerce: React.FC = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar electrodomésticos..."
+                placeholder="Buscar dispositivos..."
                 className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-500 text-slate-900"
               />
               {searchTerm && (
@@ -169,7 +169,7 @@ const Ecommerce: React.FC = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => isAuthenticated ? null : setIsLoginModalOpen(true)}
-                className="relative p-2 hover:bg-orange-50 rounded-lg transition-colors"
+                className="relative p-2 hover:bg-blue-50 rounded-lg transition-colors"
                 title={isAuthenticated ? 'Mis Favoritos' : 'Inicia sesión para ver favoritos'}
               >
                 <span className={`material-icons ${favorites.length > 0 ? 'text-red-500' : 'text-slate-700'}`}>
@@ -182,7 +182,7 @@ const Ecommerce: React.FC = () => {
 
               <button
                 onClick={() => setIsCartModalOpen(true)}
-                className="relative p-2 hover:bg-orange-50 rounded-lg transition-colors"
+                className="relative p-2 hover:bg-blue-50 rounded-lg transition-colors"
               >
                 <span className="material-icons text-slate-700">shopping_cart</span>
                 {getCartCount() > 0 && (
@@ -214,7 +214,7 @@ const Ecommerce: React.FC = () => {
                         logout();
                         setShowUserMenu(false);
                       }}
-                      className="w-full px-4 py-2 text-left text-sm hover:bg-orange-50 transition-colors flex items-center gap-2 text-slate-900"
+                      className="w-full px-4 py-2 text-left text-sm hover:bg-blue-50 transition-colors flex items-center gap-2 text-slate-900"
                     >
                       <span className="material-icons text-sm">logout</span>
                       Cerrar Sesión
@@ -228,14 +228,14 @@ const Ecommerce: React.FC = () => {
       </nav>
 
       {/* Content Container with proper spacing for fixed navbar */}
-      <div className="pt-16">
+      <div className="pt-24">
         {/* Main Message Banner */}
-        <div className="bg-gradient-to-r from-orange-50 via-orange-100 to-orange-50 border-b border-orange-200 animate-fade-in">
+        <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 border-b border-blue-200 animate-fade-in">
           <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-center gap-3">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 text-center sm:text-left">
               <span className="material-icons text-primary animate-pulse">local_offer</span>
-              <p className="text-sm md:text-base font-semibold text-slate-900">
-                <span className="text-primary">¡SUPER OFERTAS!</span> Hasta 50% de descuento en electrodomésticos seleccionados | Envío gratis en compras mayores a ₲ 1.700.000
+              <p className="text-sm md:text-base font-semibold text-slate-900 leading-tight">
+                <span className="text-primary font-bold">¡TECH WEEK!</span> Hasta 40% OFF en Apple y Samsung | Envío gratis en todo el país
               </p>
             </div>
           </div>
@@ -271,7 +271,7 @@ const Ecommerce: React.FC = () => {
           <div className="flex items-center justify-between mb-10">
             <div>
               <h2 className="text-3xl font-bold mb-2 text-slate-900">
-                {searchTerm ? `Resultados para "${searchTerm}"` : 'Todos los Productos'}
+                {searchTerm ? `Resultados para "${searchTerm}"` : 'Últimos Lanzamientos'}
               </h2>
               <p className="text-slate-600">
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'producto encontrado' : 'productos encontrados'}
@@ -294,7 +294,7 @@ const Ecommerce: React.FC = () => {
                 <div key={product.id} className="product-card bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all group border border-slate-100">
                   <div className="relative bg-white p-6">
                     <img
-                      src={`https://images.unsplash.com/${product.img}?w=400&h=400&fit=crop`}
+                      src={`https://images.unsplash.com/${product.img}?w=500&q=80`}
                       alt={product.name}
                       className="w-full h-56 object-contain group-hover:scale-105 transition-transform duration-500"
                     />
@@ -377,26 +377,26 @@ const Ecommerce: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3 text-slate-900">Explora por Categoría</h2>
-            <p className="text-slate-600">Encuentra exactamente lo que necesitas</p>
+            <p className="text-slate-600">Encuentra tu próximo dispositivo ideal</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: 'kitchen', name: 'Heladeras', count: '+150 productos', color: 'primary' },
-              { icon: 'local_laundry_service', name: 'Lavarropas', count: '+85 productos', color: 'blue-500' },
-              { icon: 'microwave', name: 'Hornos', count: '+62 productos', color: 'purple-500' },
-              { icon: 'ac_unit', name: 'Climatización', count: '+95 productos', color: 'amber-500' },
-              { icon: 'countertops', name: 'Cocinas', count: '+48 productos', color: 'cyan-500' },
-              { icon: 'cleaning_services', name: 'Lavavajillas', count: '+34 productos', color: 'pink-500' },
-              { icon: 'blender', name: 'Pequeños', count: '+120 productos', color: 'emerald-500' },
-              { icon: 'smart_display', name: 'Smart Home', count: '+76 productos', color: 'indigo-500' },
+              { icon: 'smartphone', name: 'Smartphones', count: '+120 modelos', color: 'primary' },
+              { icon: 'laptop_mac', name: 'Laptops', count: '+85 modelos', color: 'blue-500' },
+              { icon: 'tablet_mac', name: 'Tablets', count: '+42 modelos', color: 'purple-500' },
+              { icon: 'watch', name: 'Wearables', count: '+95 modelos', color: 'amber-500' },
+              { icon: 'headphones', name: 'Audio', count: '+150 modelos', color: 'cyan-500' },
+              { icon: 'videogame_asset', name: 'Gaming', count: '+34 consolas', color: 'pink-500' },
+              { icon: 'photo_camera', name: 'Cámaras', count: '+28 modelos', color: 'emerald-500' },
+              { icon: 'devices', name: 'Accesorios', count: '+200 items', color: 'indigo-500' },
             ].map((cat, idx) => (
               <div
                 key={idx}
                 className="group relative bg-white border-2 border-slate-200 hover:border-primary rounded-2xl p-6 transition-all cursor-pointer overflow-hidden hover:shadow-xl"
               >
                 <div className="relative z-10 text-center">
-                  <div className="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform group-hover:bg-primary">
+                  <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform group-hover:bg-primary">
                     <span className="material-icons text-4xl text-primary group-hover:text-white transition-colors">{cat.icon}</span>
                   </div>
                   <h3 className="font-bold text-lg mb-1 text-slate-900">{cat.name}</h3>
@@ -417,19 +417,19 @@ const Ecommerce: React.FC = () => {
                 <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/30">
                   <span className="material-icons text-white">bolt</span>
                 </div>
-                <span className="text-xl font-bold text-slate-900">Electro<span className="gradient-text">Store</span></span>
+                <span className="text-xl font-bold text-slate-900">Tech<span className="gradient-text">Store</span></span>
               </div>
               <p className="text-sm text-slate-600 mb-4">
-                Tu tienda de confianza para electrodomésticos de calidad. Más de 20 años en el mercado.
+                Tu tienda de confianza para tecnología de última generación. Innovación y calidad garantizada.
               </p>
               <div className="flex gap-3">
-                <a href="#" className="w-9 h-9 bg-white hover:bg-orange-50 border border-slate-200 rounded-lg flex items-center justify-center transition-all">
+                <a href="#" className="w-9 h-9 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg flex items-center justify-center transition-all">
                   <span className="material-icons text-sm text-slate-700">facebook</span>
                 </a>
-                <a href="#" className="w-9 h-9 bg-white hover:bg-orange-50 border border-slate-200 rounded-lg flex items-center justify-center transition-all">
+                <a href="#" className="w-9 h-9 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg flex items-center justify-center transition-all">
                   <span className="material-icons text-sm text-slate-700">camera_alt</span>
                 </a>
-                <a href="#" className="w-9 h-9 bg-white hover:bg-orange-50 border border-slate-200 rounded-lg flex items-center justify-center transition-all">
+                <a href="#" className="w-9 h-9 bg-white hover:bg-blue-50 border border-slate-200 rounded-lg flex items-center justify-center transition-all">
                   <span className="material-icons text-sm text-slate-700">chat</span>
                 </a>
               </div>
@@ -466,11 +466,11 @@ const Ecommerce: React.FC = () => {
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="material-icons text-primary text-sm">phone</span>
-                  <span>0800-555-ELECTRO</span>
+                  <span>0800-555-TECH</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="material-icons text-primary text-sm">email</span>
-                  <span>ventas@electrostore.com</span>
+                  <span>ventas@techstore.com</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="material-icons text-primary text-sm">schedule</span>
@@ -490,7 +490,7 @@ const Ecommerce: React.FC = () => {
           </div>
 
           <div className="border-t border-slate-200 pt-8 text-center text-sm text-slate-600">
-            <p>&copy; 2026 ElectroStore. Todos los derechos reservados. | <a href="#" className="hover:text-primary transition-colors">Términos y Condiciones</a> | <a href="#" className="hover:text-primary transition-colors">Política de Privacidad</a></p>
+            <p>&copy; 2026 TechStore. Todos los derechos reservados. | <a href="#" className="hover:text-primary transition-colors">Términos y Condiciones</a> | <a href="#" className="hover:text-primary transition-colors">Política de Privacidad</a></p>
           </div>
         </div>
       </footer>
@@ -501,7 +501,7 @@ const Ecommerce: React.FC = () => {
       </a>
 
       {/* Scroll to Top Button */}
-      <button id="scrollTop" onClick={scrollToTop} className="fixed bottom-6 left-6 w-12 h-12 bg-orange-100 hover:bg-primary border-2 border-primary rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 z-50 opacity-0 pointer-events-none">
+      <button id="scrollTop" onClick={scrollToTop} className="fixed bottom-6 left-6 w-12 h-12 bg-blue-100 hover:bg-primary border-2 border-primary rounded-full flex items-center justify-center shadow-xl transition-all hover:scale-110 z-50 opacity-0 pointer-events-none">
         <span className="material-icons text-primary hover:text-white">arrow_upward</span>
       </button>
 
